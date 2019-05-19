@@ -1,31 +1,85 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="listQuery.title" :placeholder="$t('table.title')" style="width: 200px;" class="filter-item" @keyup.enter.native="handleFilter" />
-      <el-select v-model="listQuery.importance" :placeholder="$t('table.importance')" clearable style="width: 90px" class="filter-item">
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item" />
+      <el-input
+        v-model="listQuery.title"
+        placeholder="活动名称"
+        style="width: 200px;"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-input
+        v-model="listQuery.title"
+        placeholder="发起人"
+        style="width: 200px;"
+        class="filter-item"
+        @keyup.enter.native="handleFilter"
+      />
+      <el-select
+        v-model="listQuery.type"
+        placeholder="审核状态"
+        clearable
+        class="filter-item"
+        style="width: 130px"
+      >
+        <el-option
+          v-for="item in calendarTypeOptions"
+          :key="item.key"
+          :label="item.display_name+'('+item.key+')'"
+          :value="item.key"
+        />
       </el-select>
-      <el-select v-model="listQuery.type" :placeholder="$t('table.type')" clearable class="filter-item" style="width: 130px">
-        <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name+'('+item.key+')'" :value="item.key" />
-      </el-select>
-      <el-select v-model="listQuery.sort" style="width: 140px" class="filter-item" @change="handleFilter">
-        <el-option v-for="item in sortOptions" :key="item.key" :label="item.label" :value="item.key" />
-      </el-select>
-      <el-button v-waves class="filter-item" type="primary" icon="el-icon-search" @click="handleFilter">
-        {{ $t('table.search') }}
-      </el-button>
-      <el-button class="filter-item" style="margin-left: 10px;" type="primary" icon="el-icon-edit" @click="handleCreate">
-        {{ $t('table.add') }}
-      </el-button>
-      <el-button v-waves :loading="downloadLoading" class="filter-item" type="primary" icon="el-icon-download" @click="handleDownload">
-        {{ $t('table.export') }}
-      </el-button>
+      <el-date-picker
+        v-model="value6"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="开始日期"
+        end-placeholder="结束日期"
+        class="filter-item"
+        style="width: 400px"
+      ></el-date-picker>
+
+      <!-- <el-select
+        v-model="listQuery.sort"
+        style="width: 140px"
+        class="filter-item"
+        @change="handleFilter"
+      >
+        <el-option
+          v-for="item in sortOptions"
+          :key="item.key"
+          :label="item.label"
+          :value="item.key"
+        />
+      </el-select>-->
+      <el-button
+        v-waves
+        class="filter-item"
+        type="primary"
+        icon="el-icon-delete"
+        @click="handleFilter"
+      >批量删除</el-button>
+      <!-- <el-button
+        class="filter-item"
+        style="margin-left: 10px;"
+        type="primary"
+        icon="el-icon-edit"
+        @click="handleCreate"
+      >{{ $t('table.add') }}</el-button>
+      <el-button
+        v-waves
+        :loading="downloadLoading"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-download"
+        @click="handleDownload"
+      >{{ $t('table.export') }}</el-button>-->
       <!-- <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
         {{ $t('table.reviewer') }}
-      </el-checkbox> -->
+      </el-checkbox>-->
     </div>
 
-  <!-- <el-table
+    <!-- <el-table
     :data="tableData"
      border
       stripe
@@ -74,175 +128,181 @@
           @click="handleDelete(scope.$index, scope.row)">删除</el-button>
       </template>
     </el-table-column>
-  </el-table> -->
-<el-table
-    :data="tableData"
-    style="width: 100%" >
-    <el-table-column type="expand">
-      <template slot-scope="props">
-        <el-form label-position="left" inline class="demo-table-expand">
-          <el-form-item label="活动名称">
-            <span>{{ props.row.title }}</span>
-          </el-form-item>
-          <el-form-item label="线路长短">
-            <span>{{ props.row.length }}</span>
-          </el-form-item>
-          <el-form-item label="出发地">
-            <span>{{ props.row.start }}</span>
-          </el-form-item>
-          <el-form-item label="目的地">
-            <span>{{ props.row.destination }}</span>
-          </el-form-item>
-          <el-form-item label="费用">
-            <span>{{ props.row.price }}</span>
-          </el-form-item>
-          <el-form-item label="名额">
-            <span>{{ props.row.quota }}</span>
-          </el-form-item>
-        </el-form>
-      </template>
-    </el-table-column>
-    <el-table-column
-      label="序号"
-      prop="id"
-         sortable
-      width="60px">
-    </el-table-column>
-    <el-table-column
-      label="活动名称"
-      prop="title">
-    </el-table-column>
-    <el-table-column
-      label="活动时间"
-      prop="time">
-    </el-table-column>
-        <el-table-column
-      label="发起人"
-      prop="name">
-    </el-table-column>
-        <el-table-column
-      label="审核状态"
-      prop="status">
-    </el-table-column>
-        <el-table-column label="操作">
-      <template slot-scope="scope">
-        <el-button
-          size="mini"
-          @click="dialogpass = true">通过</el-button>
-        <el-button
-          size="mini"
-          type="danger"
-          @click="dialogdelete = true">删除</el-button>       
-      </template>
-    </el-table-column>
-  </el-table>
-    <pagination v-show="total>0" :total="total" :page.sync="listQuery.page" :limit.sync="listQuery.limit" @pagination="getList" />
+    </el-table>-->
+    <el-table :data="tableData" style="width: 100%">
+      <el-table-column type="expand">
+        <template slot-scope="props">
+          <el-form label-position="left" inline class="demo-table-expand">
+            <el-form-item label="活动名称">
+              <span>{{ props.row.title }}</span>
+            </el-form-item>
+            <el-form-item label="线路长短">
+              <span>{{ props.row.length }}</span>
+            </el-form-item>
+            <el-form-item label="出发地">
+              <span>{{ props.row.start }}</span>
+            </el-form-item>
+            <el-form-item label="目的地">
+              <span>{{ props.row.destination }}</span>
+            </el-form-item>
+            <el-form-item label="费用">
+              <span>{{ props.row.price }}</span>
+            </el-form-item>
+            <el-form-item label="名额">
+              <span>{{ props.row.quota }}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
+      <el-table-column type="selection" width="55"></el-table-column>
+      <el-table-column label="序号" prop="id" sortable width="60px"></el-table-column>
+      <el-table-column label="活动名称" prop="title"></el-table-column>
+      <el-table-column label="活动时间" prop="time"></el-table-column>
+      <el-table-column label="发起人" prop="name"></el-table-column>
+      <el-table-column label="审核状态" prop="status"></el-table-column>
+      <el-table-column label="操作" width="220px">
+        <template>
+          <el-button size="mini" @click="dialogpass = true">通过</el-button>
+          <router-link :to="'/activity-manage/edit/'">
+            <el-button type="success" plain size="mini">报名审核</el-button>
+          </router-link>
+          <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <pagination
+      v-show="total>0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+    />
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form ref="dataForm" :rules="rules" :model="temp" label-position="left" label-width="70px" style="width: 400px; margin-left:50px;">
+      <el-form
+        ref="dataForm"
+        :rules="rules"
+        :model="temp"
+        label-position="left"
+        label-width="70px"
+        style="width: 400px; margin-left:50px;"
+      >
         <el-form-item :label="$t('table.type')" prop="type">
           <el-select v-model="temp.type" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in calendarTypeOptions" :key="item.key" :label="item.display_name" :value="item.key" />
+            <el-option
+              v-for="item in calendarTypeOptions"
+              :key="item.key"
+              :label="item.display_name"
+              :value="item.key"
+            />
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('table.date')" prop="timestamp">
-          <el-date-picker v-model="temp.timestamp" type="datetime" placeholder="Please pick a date" />
+          <el-date-picker
+            v-model="temp.timestamp"
+            type="datetime"
+            placeholder="Please pick a date"
+          />
         </el-form-item>
         <el-form-item :label="$t('table.title')" prop="title">
-          <el-input v-model="temp.title" />
+          <el-input v-model="temp.title"/>
         </el-form-item>
         <el-form-item :label="$t('table.status')">
           <el-select v-model="temp.status" class="filter-item" placeholder="Please select">
-            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item" />
+            <el-option v-for="item in statusOptions" :key="item" :label="item" :value="item"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="$t('table.importance')">
-          <el-rate v-model="temp.importance" :colors="['#99A9BF', '#F7BA2A', '#FF9900']" :max="3" style="margin-top:8px;" />
+          <el-rate
+            v-model="temp.importance"
+            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+            :max="3"
+            style="margin-top:8px;"
+          />
         </el-form-item>
         <el-form-item :label="$t('table.remark')">
-          <el-input v-model="temp.remark" :autosize="{ minRows: 2, maxRows: 4}" type="textarea" placeholder="Please input" />
+          <el-input
+            v-model="temp.remark"
+            :autosize="{ minRows: 2, maxRows: 4}"
+            type="textarea"
+            placeholder="Please input"
+          />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">
-          {{ $t('table.cancel') }}
-        </el-button>
-        <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">
-          {{ $t('table.confirm') }}
-        </el-button>
+        <el-button @click="dialogFormVisible = false">{{ $t('table.cancel') }}</el-button>
+        <el-button
+          type="primary"
+          @click="dialogStatus==='create'?createData():updateData()"
+        >{{ $t('table.confirm') }}</el-button>
       </div>
     </el-dialog>
 
     <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
       <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
+        <el-table-column prop="key" label="Channel"/>
+        <el-table-column prop="pv" label="Pv"/>
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
       </span>
     </el-dialog>
-    <el-dialog
-  
-  :visible.sync="dialogpass"
-  width="30%"
-  :before-close="handleClose">
-  <span>是否通过</span>
-  <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogpass = false">取 消</el-button>
-    <el-button type="primary" @click="dialogpass = false">确 定</el-button>
-  </span>
-</el-dialog>
+    <el-dialog :visible.sync="dialogpass" width="30%" :before-close="handleClose">
+      <span>是否通过</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogpass = false">取 消</el-button>
+        <el-button type="primary" @click="dialogpass = false">确 定</el-button>
+      </span>
+    </el-dialog>
 
-<el-dialog
-  
-  :visible.sync="dialogdelete"
-  width="30%"
-  :before-close="handleClose">
-  <span>是否删除</span>
-  <span slot="footer" class="dialog-footer">
-    <el-button @click="dialogdelete = false">取 消</el-button>
-    <el-button type="primary" @click="dialogdelete = false">确 定</el-button>
-  </span>
-</el-dialog>
-
+    <el-dialog :visible.sync="dialogdelete" width="30%" :before-close="handleClose">
+      <span>是否删除</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogdelete = false">取 消</el-button>
+        <el-button type="primary" @click="dialogdelete = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { fetchList, fetchPv, createArticle, updateArticle } from '@/api/article'
-import waves from '@/directive/waves' // waves directive
-import { parseTime } from '@/utils'
-import Pagination from '@/components/Pagination' // secondary package based on el-pagination
+import {
+  fetchList,
+  fetchPv,
+  createArticle,
+  updateArticle
+} from "@/api/article";
+import waves from "@/directive/waves"; // waves directive
+import { parseTime } from "@/utils";
+import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
 
 const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
+  { key: "CN", display_name: "China" },
+  { key: "US", display_name: "USA" },
+  { key: "JP", display_name: "Japan" },
+  { key: "EU", display_name: "Eurozone" }
+];
 
 // arr to obj, such as { CN : "China", US : "USA" }
 const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
+  acc[cur.key] = cur.display_name;
+  return acc;
+}, {});
 
 export default {
-  name: 'ComplexTable',
+  name: "ComplexTable",
   components: { Pagination },
   directives: { waves },
   filters: {
     statusFilter(status) {
       const statusMap = {
-        published: 'success',
-        draft: 'info',
-        deleted: 'danger'
-      }
-      return statusMap[status]
+        published: "success",
+        draft: "info",
+        deleted: "danger"
+      };
+      return statusMap[status];
     },
     typeFilter(type) {
-      return calendarTypeKeyValue[type]
+      return calendarTypeKeyValue[type];
     }
   },
   data() {
@@ -257,256 +317,270 @@ export default {
         importance: undefined,
         title: undefined,
         type: undefined,
-        sort: '+id'
+        sort: "+id"
       },
-        tableData: [{
-        id:'1',
-          title:'啦啦啦啦啦啦',
-          time: '2019/05/11-2019/5/20',
-          name: '王小虎',
-          status:'审核中',
-          length:'长线',
-          start:'桂林',
-          destination:'桂林',
-          price:"AA",
-          quota:'100人'
-        },{
-        id:'1',
-          title:'啦啦啦啦啦啦',
-          time: '2019/05/11-2019/5/20',
-          name: '王小虎',
-          status:'审核中',
-          length:'长线',
-          start:'桂林',
-          destination:'桂林',
-          price:"AA",
-          quota:'100人'
-          },{
-         id:'1',
-          title:'啦啦啦啦啦啦',
-          time: '2019/05/11-2019/5/20',
-          name: '王小虎',
-          status:'审核中',
-          length:'长线',
-          start:'桂林',
-          destination:'桂林',
-          price:"AA",
-          quota:'100人'
-          },{
-        id:'1',
-          title:'啦啦啦啦啦啦',
-          time: '2019/05/11-2019/5/20',
-          name: '王小虎',
-          status:'审核中',
-          length:'长线',
-          start:'桂林',
-          destination:'桂林',
-          price:"AA",
-          quota:'100人'
-          }
-          ],
+      tableData: [
+        {
+          id: "1",
+          title: "啦啦啦啦啦啦",
+          time: "2019/05/11-2019/5/20",
+          name: "王小虎",
+          status: "审核中",
+          length: "长线",
+          start: "桂林",
+          destination: "桂林",
+          price: "AA",
+          quota: "100人"
+        },
+        {
+          id: "1",
+          title: "啦啦啦啦啦啦",
+          time: "2019/05/11-2019/5/20",
+          name: "王小虎",
+          status: "审核中",
+          length: "长线",
+          start: "桂林",
+          destination: "桂林",
+          price: "AA",
+          quota: "100人"
+        },
+        {
+          id: "1",
+          title: "啦啦啦啦啦啦",
+          time: "2019/05/11-2019/5/20",
+          name: "王小虎",
+          status: "审核中",
+          length: "长线",
+          start: "桂林",
+          destination: "桂林",
+          price: "AA",
+          quota: "100人"
+        },
+        {
+          id: "1",
+          title: "啦啦啦啦啦啦",
+          time: "2019/05/11-2019/5/20",
+          name: "王小虎",
+          status: "审核中",
+          length: "长线",
+          start: "桂林",
+          destination: "桂林",
+          price: "AA",
+          quota: "100人"
+        }
+      ],
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
-      sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
-      statusOptions: ['published', 'draft', 'deleted'],
+      sortOptions: [
+        { label: "ID Ascending", key: "+id" },
+        { label: "ID Descending", key: "-id" }
+      ],
+      statusOptions: ["published", "draft", "deleted"],
       showReviewer: false,
       temp: {
         id: undefined,
         importance: 1,
-        remark: '',
+        remark: "",
         timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
+        title: "",
+        type: "",
+        status: "published"
       },
       dialogFormVisible: false,
-      dialogStatus: '',
+      dialogStatus: "",
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: "Edit",
+        create: "Create"
       },
       dialogPvVisible: false,
-      dialogdelete:false,
-      dialogpass:false,
+      dialogdelete: false,
+      dialogpass: false,
       pvData: [],
       rules: {
-        type: [{ required: true, message: 'type is required', trigger: 'change' }],
-        timestamp: [{ type: 'date', required: true, message: 'timestamp is required', trigger: 'change' }],
-        title: [{ required: true, message: 'title is required', trigger: 'blur' }]
+        type: [
+          { required: true, message: "type is required", trigger: "change" }
+        ],
+        timestamp: [
+          {
+            type: "date",
+            required: true,
+            message: "timestamp is required",
+            trigger: "change"
+          }
+        ],
+        title: [
+          { required: true, message: "title is required", trigger: "blur" }
+        ]
       },
       downloadLoading: false
-    }
+    };
   },
-  created() {
-    this.getList()
-  },
+  created() {},
   methods: {
-    getList() {
-      this.listLoading = true
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items
-        this.total = response.data.total
-    
-  
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
-      })
-    },    handleEdit(index, row) {
-        console.log(index, row);
-      },
-      handleDelete(index, row) {
-        console.log(index, row);
-      },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+    handleEdit(index, row) {
+      console.log(index, row);
+    },
+    handleDelete(index, row) {
+      console.log(index, row);
+    },
     handleFilter() {
-      this.listQuery.page = 1
-      this.getList()
+      this.listQuery.page = 1;
     },
     handleModifyStatus(row, status) {
       this.$message({
-        message: '操作成功',
-        type: 'success'
-      })
-      row.status = status
+        message: "操作成功",
+        type: "success"
+      });
+      row.status = status;
     },
     sortChange(data) {
-      const { prop, order } = data
-      if (prop === 'id') {
-        this.sortByID(order)
+      const { prop, order } = data;
+      if (prop === "id") {
+        this.sortByID(order);
       }
     },
     sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = '+id'
+      if (order === "ascending") {
+        this.listQuery.sort = "+id";
       } else {
-        this.listQuery.sort = '-id'
+        this.listQuery.sort = "-id";
       }
-      this.handleFilter()
+      this.handleFilter();
     },
     resetTemp() {
       this.temp = {
         id: undefined,
         importance: 1,
-        remark: '',
+        remark: "",
         timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
-      }
+        title: "",
+        status: "published",
+        type: ""
+      };
     },
     handleCreate() {
-      this.resetTemp()
-      this.dialogStatus = 'create'
-      this.dialogFormVisible = true
+      this.resetTemp();
+      this.dialogStatus = "create";
+      this.dialogFormVisible = true;
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+        this.$refs["dataForm"].clearValidate();
+      });
     },
     createData() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs["dataForm"].validate(valid => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
+          this.temp.id = parseInt(Math.random() * 100) + 1024; // mock a id
+          this.temp.author = "vue-element-admin";
           createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp)
-            this.dialogFormVisible = false
+            this.list.unshift(this.temp);
+            this.dialogFormVisible = false;
             this.$notify({
-              title: '成功',
-              message: '创建成功',
-              type: 'success',
+              title: "成功",
+              message: "创建成功",
+              type: "success",
               duration: 2000
-            })
-          })
+            });
+          });
         }
-      })
+      });
     },
     handleUpdate(row) {
-      this.temp = Object.assign({}, row) // copy obj
-      this.temp.timestamp = new Date(this.temp.timestamp)
-      this.dialogStatus = 'update'
-      this.dialogFormVisible = true
+      this.temp = Object.assign({}, row); // copy obj
+      this.temp.timestamp = new Date(this.temp.timestamp);
+      this.dialogStatus = "update";
+      this.dialogFormVisible = true;
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
-      })
+        this.$refs["dataForm"].clearValidate();
+      });
     },
     updateData() {
-      this.$refs['dataForm'].validate((valid) => {
+      this.$refs["dataForm"].validate(valid => {
         if (valid) {
-          const tempData = Object.assign({}, this.temp)
-          tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
+          const tempData = Object.assign({}, this.temp);
+          tempData.timestamp = +new Date(tempData.timestamp); // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
           updateArticle(tempData).then(() => {
             for (const v of this.list) {
               if (v.id === this.temp.id) {
-                const index = this.list.indexOf(v)
-                this.list.splice(index, 1, this.temp)
-                break
+                const index = this.list.indexOf(v);
+                this.list.splice(index, 1, this.temp);
+                break;
               }
             }
-            this.dialogFormVisible = false
+            this.dialogFormVisible = false;
             this.$notify({
-              title: '成功',
-              message: '更新成功',
-              type: 'success',
+              title: "成功",
+              message: "更新成功",
+              type: "success",
               duration: 2000
-            })
-          })
+            });
+          });
         }
-      })
+      });
     },
     handleDelete(row) {
       this.$notify({
-        title: '成功',
-        message: '删除成功',
-        type: 'success',
+        title: "成功",
+        message: "删除成功",
+        type: "success",
         duration: 2000
-      })
-      const index = this.list.indexOf(row)
-      this.list.splice(index, 1)
+      });
+      const index = this.list.indexOf(row);
+      this.list.splice(index, 1);
     },
     handleFetchPv(pv) {
       fetchPv(pv).then(response => {
-        this.pvData = response.data.pvData
-        this.dialogPvVisible = true
-      })
+        this.pvData = response.data.pvData;
+        this.dialogPvVisible = true;
+      });
     },
     handleDownload() {
-      this.downloadLoading = true
-      import('@/vendor/Export2Excel').then(excel => {
-        const tHeader = ['timestamp', 'title', 'type', 'importance', 'status']
-        const filterVal = ['timestamp', 'title', 'type', 'importance', 'status']
-        const data = this.formatJson(filterVal, this.list)
+      this.downloadLoading = true;
+      import("@/vendor/Export2Excel").then(excel => {
+        const tHeader = ["timestamp", "title", "type", "importance", "status"];
+        const filterVal = [
+          "timestamp",
+          "title",
+          "type",
+          "importance",
+          "status"
+        ];
+        const data = this.formatJson(filterVal, this.list);
         excel.export_json_to_excel({
           header: tHeader,
           data,
-          filename: 'table-list'
-        })
-        this.downloadLoading = false
-      })
+          filename: "table-list"
+        });
+        this.downloadLoading = false;
+      });
     },
     formatJson(filterVal, jsonData) {
-      return jsonData.map(v => filterVal.map(j => {
-        if (j === 'timestamp') {
-          return parseTime(v[j])
-        } else {
-          return v[j]
-        }
-      }))
+      return jsonData.map(v =>
+        filterVal.map(j => {
+          if (j === "timestamp") {
+            return parseTime(v[j]);
+          } else {
+            return v[j];
+          }
+        })
+      );
     }
   }
-}
+};
 </script>
 <style scoped>
-  .demo-table-expand {
-    font-size: 0;
-  }
-  .demo-table-expand label {
-    width: 90px;
-    color: #99a9bf;
-  }
-  .demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
-  }
+.demo-table-expand {
+  font-size: 0;
+}
+.demo-table-expand label {
+  width: 90px;
+  color: #99a9bf;
+}
+.demo-table-expand .el-form-item {
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 50%;
+}
 </style>

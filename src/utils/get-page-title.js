@@ -1,7 +1,6 @@
-import defaultSettings from '@/settings'
-import i18n from '@/lang'
+import i18n from '@/lang';
 
-const title = defaultSettings.title || 'Vue Element Admin'
+const title = '走啊徒步网管理后台';
 
 export default function getPageTitle(key) {
   const hasKey = i18n.te(`route.${key}`)

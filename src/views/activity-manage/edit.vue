@@ -3,45 +3,72 @@
     <div class="filter-container">
       <el-input
         v-model="listQuery.title"
-        placeholder="闲趣标题"
-        style="width: 200px;"
-        class="filter-item"
-        @keyup.enter.native="handleFilter"
-      />
-      <el-input
-        v-model="listQuery.title"
-        placeholder="用户名"
+        :placeholder="$t('table.title')"
         style="width: 200px;"
         class="filter-item"
         @keyup.enter.native="handleFilter"
       />
       <el-select
         v-model="listQuery.importance"
-        placeholder="类型"
+        :placeholder="$t('table.importance')"
         clearable
         style="width: 90px"
         class="filter-item"
       >
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
       </el-select>
-      <el-date-picker v-model="value1" type="date" class="filter-item" placeholder="选择日期"></el-date-picker>
+      <el-select
+        v-model="listQuery.type"
+        :placeholder="$t('table.type')"
+        clearable
+        class="filter-item"
+        style="width: 130px"
+      >
+        <el-option
+          v-for="item in calendarTypeOptions"
+          :key="item.key"
+          :label="item.display_name+'('+item.key+')'"
+          :value="item.key"
+        />
+      </el-select>
+      <el-select
+        v-model="listQuery.sort"
+        style="width: 140px"
+        class="filter-item"
+        @change="handleFilter"
+      >
+        <el-option
+          v-for="item in sortOptions"
+          :key="item.key"
+          :label="item.label"
+          :value="item.key"
+        />
+      </el-select>
+      <el-button
+        v-waves
+        class="filter-item"
+        type="primary"
+        icon="el-icon-search"
+        @click="handleFilter"
+      >{{ $t('table.search') }}</el-button>
+      <el-button
+        class="filter-item"
+        style="margin-left: 10px;"
+        type="primary"
+        icon="el-icon-edit"
+        @click="handleCreate"
+      >{{ $t('table.add') }}</el-button>
+      <el-button
+        v-waves
+        :loading="downloadLoading"
+        class="filter-item"
+        type="primary"
+        icon="el-icon-download"
+        @click="handleDownload"
+      >{{ $t('table.export') }}</el-button>
       <!-- <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
         {{ $t('table.reviewer') }}
       </el-checkbox>-->
-      <el-button
-        v-waves
-        class="filter-item"
-        type="primary"
-        icon="el-icon-delete"
-        @click="handleFilter"
-      >批量删除</el-button>
-      <el-button
-        v-waves
-        class="filter-item"
-        type="primary"
-        icon="el-icon-check"
-        @click="handleFilter"
-      >批量通过</el-button>
     </div>
 
     <el-table
@@ -55,15 +82,14 @@
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="id" label="序号" sortable width="50px"></el-table-column>
-      <el-table-column prop="title" label="闲趣名称"></el-table-column>
-      <el-table-column prop="time" label="发布时间"></el-table-column>
-      <el-table-column prop="name" label="发布人" :formatter="formatter"></el-table-column>
-      <el-table-column prop="type" label="类别" :formatter="formatter"></el-table-column>
-      <el-table-column prop="price" label="卖价" :formatter="formatter"></el-table-column>
+      <el-table-column prop="name" label="用户名" :formatter="formatter"></el-table-column>
+      <el-table-column prop="truename" label="真实姓名" :formatter="formatter"></el-table-column>
+      <el-table-column prop="sex" label="性别" :formatter="formatter"></el-table-column>
+      <el-table-column prop="number" label="手机号" :formatter="formatter"></el-table-column>
+      <el-table-column label="操作" width="300px">
+        <template>
+          <el-button size="mini" @click="dialogedit = true">通过</el-button>
 
-      <el-table-column label="操作">
-        <template slot-scope="scope">
-          <el-button size="mini" @click="dialogpass = true">通过</el-button>
           <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
         </template>
       </el-table-column>
@@ -146,13 +172,6 @@
         <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
       </span>
     </el-dialog>
-    <el-dialog :visible.sync="dialogpass" width="30%" :before-close="handleClose">
-      <span>是否通过</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogpass = false">取 消</el-button>
-        <el-button type="primary" @click="dialogpass = false">确 定</el-button>
-      </span>
-    </el-dialog>
 
     <el-dialog :visible.sync="dialogdelete" width="30%" :before-close="handleClose">
       <span>是否删除</span>
@@ -224,36 +243,39 @@ export default {
           id: "1",
           time: "2016-05-02",
           name: "王小虎",
-          title: "啦啦啦",
-          type: "装备",
-          price: "100"
+          truename: "啦啦啦",
+          sex: "女",
+          number: "13338383388",
+          password: "admin"
         },
         {
           id: "1",
           time: "2016-05-02",
           name: "王小虎",
-          title: "啦啦啦",
-          type: "装备",
-          price: "100"
+          truename: "啦啦啦",
+          sex: "女",
+          number: "13338383388",
+          password: "admin"
         },
         {
           id: "1",
           time: "2016-05-02",
           name: "王小虎",
-          title: "啦啦啦",
-          type: "装备",
-          price: "100"
+          truename: "啦啦啦",
+          sex: "女",
+          number: "13338383388",
+          password: "admin"
         },
         {
           id: "1",
           time: "2016-05-02",
           name: "王小虎",
-          title: "啦啦啦",
-          type: "装备",
-          price: "100"
+          truename: "啦啦啦",
+          sex: "女",
+          number: "13338383388",
+          password: "admin"
         }
       ],
-      multipleSelection: [],
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
       sortOptions: [
@@ -272,14 +294,17 @@ export default {
         status: "published"
       },
       dialogFormVisible: false,
+      multipleSelection: [],
+      input: "",
       dialogStatus: "",
       textMap: {
         update: "Edit",
         create: "Create"
       },
-      dialogPvVisible: false,
+      dialogedit: false,
+      dialogban: false,
       dialogdelete: false,
-      dialogpass: false,
+      dialogPvVisible: false,
       pvData: [],
       rules: {
         type: [
@@ -306,21 +331,16 @@ export default {
   methods: {
     getList() {
       this.listLoading = true;
-      fetchList(this.listQuery).then(response => {
-        this.list = response.data.items;
-        this.total = response.data.total;
-
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false;
-        }, 1.5 * 1000);
-      });
+    },
+    handleClose(done) {
+      this.$confirm("确认关闭？")
+        .then(_ => {
+          done();
+        })
+        .catch(_ => {});
     },
     handleEdit(index, row) {
       console.log(index, row);
-    },
-    handleSelectionChange(val) {
-      this.multipleSelection = val;
     },
     handleDelete(index, row) {
       console.log(index, row);
@@ -360,6 +380,9 @@ export default {
         status: "published",
         type: ""
       };
+    },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
     },
     handleCreate() {
       this.resetTemp();

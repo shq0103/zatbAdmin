@@ -1,16 +1,16 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import Vue from 'vue';
+import Router from 'vue-router';
 
 Vue.use(Router)
 
 /* Layout */
-import Layout from '@/layout'
+import Layout from '@/layout';
 
 /* Router Modules */
-import componentsRouter from './modules/components'
-import chartsRouter from './modules/charts'
-import tableRouter from './modules/table'
-import nestedRouter from './modules/nested'
+import componentsRouter from './modules/components';
+import chartsRouter from './modules/charts';
+import tableRouter from './modules/table';
+import nestedRouter from './modules/nested';
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -79,7 +79,12 @@ export const constantRoutes = [
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
         name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'dashboard', noCache: true, affix: true }
+        meta: {
+          title: 'dashboard',
+          icon: 'dashboard',
+          noCache: true,
+          affix: true
+        }
       }
     ]
   },
@@ -123,9 +128,21 @@ export const constantRoutes = [
         component: () => import('@/views/activity-manage/public'),
         name: '活动发布',
         meta: { title: '活动发布', icon: 'edit' }
+      },
+      {
+        path: 'edit',
+        component: () => import('@/views/activity-manage/edit'),
+        name: '活动报名审核',
+        meta: {
+          title: '活动报名审核',
+          noCache: true,
+          activeMenu: '/activity-manage/index'
+        },
+        hidden: true
       }
     ]
-  }, {
+  },
+  {
     path: '/new-manage',
     component: Layout,
     meta: { title: '资讯管理', icon: 'mnews' },
@@ -191,7 +208,7 @@ export const constantRoutes = [
         meta: { title: '评论管理', icon: 'mcom' }
       }
     ]
-  },
+  }
   // {
   //   path: '/guide',
   //   component: Layout,
@@ -482,11 +499,12 @@ export const asyncRoutes = [
   { path: '*', redirect: '/404', hidden: true }
 ]
 
-const createRouter = () => new Router({
-  // mode: 'history', // require service support
-  scrollBehavior: () => ({ y: 0 }),
-  routes: constantRoutes
-})
+const createRouter = () =>
+  new Router({
+    // mode: 'history', // require service support
+    scrollBehavior: () => ({ y: 0 }),
+    routes: constantRoutes
+  })
 
 const router = createRouter()
 
