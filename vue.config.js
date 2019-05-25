@@ -44,7 +44,7 @@ module.exports = {
       //   }
       // }
       '/api': {
-        target: 'http://118.89.50.76:9527',
+        target: 'http://203.195.140.254:8888',
         changeOrigin: true
       }
     },
