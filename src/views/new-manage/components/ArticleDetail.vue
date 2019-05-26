@@ -43,7 +43,7 @@
                     />
                   </el-form-item>
                 </el-col>
-                <!-- 
+                <!--
                 <el-col :span="6">
                   <el-form-item
                     label-width="90px"
@@ -64,6 +64,24 @@
             </div>
           </el-col>
         </el-row>
+        <el-row>
+          <el-col :span="6">
+            <el-form-item prop="content" style="margin-bottom: 30px;">
+              <el-select v-model="postForm.type" placeholder="请选择新闻类型">
+                <el-option label="资讯" :value="1"></el-option>
+                <el-option label="户外技巧" :value="2"></el-option>
+                <el-option label="户外常识" :value="3"></el-option>
+                <el-option label="户外装备" :value="4"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="18">
+            <el-form-item prop="content" style="margin-bottom: 30px;">
+              <el-input v-model="postForm.source" placeholder="请输入来源"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
         <!-- <el-form-item style="margin-bottom: 40px;" label-width="70px" label="Summary:">
           <el-input
@@ -80,10 +98,22 @@
         <el-form-item prop="content" style="margin-bottom: 30px;">
           <Tinymce ref="editor" v-model="postForm.contents" :height="400"/>
         </el-form-item>
-        <!-- 
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
+
+        <!-- <el-form-item prop="image_uri" style="margin-bottom: 30px;">
           <Upload v-model="postForm.image_uri"/>
         </el-form-item>-->
+        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
+          <el-upload
+            action="/api/File/UploadImg"
+            list-type="picture-card"
+            :on-success="uploadSuccess"
+            :on-remove="handleRemove"
+            :headers="{Authorization:`Bearer ${token}`}"
+            :limit="1"
+          >
+            <span>点击上传封面图片</span>
+          </el-upload>
+        </el-form-item>
       </div>
     </el-form>
   </div>
@@ -104,6 +134,8 @@ import {
   PlatformDropdown,
   SourceUrlDropdown
 } from "./Dropdown";
+import { getToken } from "@/utils/auth";
+import store from "@/store";
 
 const defaultForm = {
   author: "",
@@ -111,7 +143,7 @@ const defaultForm = {
   content: "", // 文章内容
   content_short: "", // 文章摘要
   source_uri: "", // 文章外链
-  image_uri: "", // 文章图片
+  imgList: [], // 文章图片
   date: undefined // 发表时间
 };
 
@@ -161,8 +193,17 @@ export default {
       }
     };
     return {
-      postForm: Object.assign({}, defaultForm),
+      postForm: {
+        author: "", //作者
+        title: "", // 文章题目
+        content: "", // 文章内容
+        imgList: "", // 文章图片
+        type: 1,
+        date: undefined, // 发表时间
+        source: ""
+      },
       loading: false,
+      token: "",
       userListOptions: [],
       rules: {
         // image_uri: [{ validator: validateRequire }],
@@ -182,6 +223,7 @@ export default {
     }
   },
   created() {
+    this.token = store.getters.token;
     if (this.isEdit) {
       const id = this.$route.params && this.$route.params.id;
       this.fetchData(id);
@@ -220,6 +262,7 @@ export default {
     submitForm() {
       // this.postForm.display_time = parseInt(this.display_time / 1000);
       console.log(this.postForm);
+      this.postForm.date = new Date(this.postForm.date).getTime();
       this.$refs.postForm.validate(valid => {
         if (valid) {
           this.loading = true;
@@ -266,6 +309,10 @@ export default {
         if (!response.data.items) return;
         this.userListOptions = response.data.items.map(v => v.name);
       });
+    },
+    uploadSuccess(response) {
+      this.postForm.imgList[0] = response.data;
+      console.log(response);
     }
   }
 };
