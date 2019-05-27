@@ -15,7 +15,6 @@
           Draft
         </el-button>-->
       </sticky>
-
       <div class="createPost-main-container">
         <el-row>
           <!-- <Warning /> -->
@@ -29,79 +28,52 @@
               <el-row>
                 <el-col :span="8">
                   <el-form-item label-width="60px" label="作者:" class="postInfo-container-item">
-                    <el-input v-model="postForm.author"/>
+                    <el-input v-model="postForm.author" placeholder="请填写作者名称"></el-input>
                   </el-form-item>
                 </el-col>
 
                 <el-col :span="10">
                   <el-form-item label-width="120px" label="发布时间:" class="postInfo-container-item">
                     <el-date-picker
-                      v-model="postForm.date"
+                      v-model="postForm.display_time"
                       type="datetime"
                       format="yyyy-MM-dd HH:mm:ss"
                       placeholder="请选择发布时间"
                     />
                   </el-form-item>
                 </el-col>
-                <!--
+
                 <el-col :span="6">
-                  <el-form-item
-                    label-width="90px"
-                    label="Importance:"
-                    class="postInfo-container-item"
-                  >
-                    <el-rate
-                      v-model="postForm.importance"
-                      :max="3"
-                      :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-                      :low-threshold="1"
-                      :high-threshold="3"
-                      style="margin-top:8px;"
-                    />
+                  <el-form-item label-width="80px" label="新闻类型:" class="postInfo-container-item">
+                    <el-select v-model="postForm.type" placeholder="请选择新闻类型">
+                      <el-option label="资讯" :value="1"></el-option>
+                      <el-option label="户外技巧" :value="2"></el-option>
+                      <el-option label="户外常识" :value="3"></el-option>
+                      <el-option label="户外装备" :value="4"></el-option>
+                    </el-select>
                   </el-form-item>
-                </el-col>-->
+                </el-col>
               </el-row>
             </div>
           </el-col>
         </el-row>
-        <el-row>
-          <el-col :span="6">
-            <el-form-item prop="content" style="margin-bottom: 30px;">
-              <el-select v-model="postForm.type" placeholder="请选择新闻类型">
-                <el-option label="资讯" :value="1"></el-option>
-                <el-option label="户外技巧" :value="2"></el-option>
-                <el-option label="户外常识" :value="3"></el-option>
-                <el-option label="户外装备" :value="4"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
 
-          <el-col :span="18">
-            <el-form-item prop="content" style="margin-bottom: 30px;">
-              <el-input v-model="postForm.source" placeholder="请输入来源"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <!-- <el-form-item style="margin-bottom: 40px;" label-width="70px" label="Summary:">
+        <el-form-item style="margin-bottom: 40px;" label-width="90px" label="新闻来源:">
           <el-input
             v-model="postForm.content_short"
             :rows="1"
             type="textarea"
             class="article-textarea"
             autosize
-            placeholder="Please enter the content"
+            placeholder="请输入新闻来源"
           />
           <span v-show="contentShortLength" class="word-counter">{{ contentShortLength }}words</span>
-        </el-form-item>-->
-
-        <el-form-item prop="content" style="margin-bottom: 30px;">
-          <Tinymce ref="editor" v-model="postForm.contents" :height="400"/>
         </el-form-item>
 
-        <!-- <el-form-item prop="image_uri" style="margin-bottom: 30px;">
-          <Upload v-model="postForm.image_uri"/>
-        </el-form-item>-->
+        <el-form-item prop="content" style="margin-bottom: 30px;">
+          <Tinymce ref="editor" v-model="postForm.content" :height="400"/>
+        </el-form-item>
+
         <el-form-item prop="image_uri" style="margin-bottom: 30px;">
           <el-upload
             action="/api/File/UploadImg"

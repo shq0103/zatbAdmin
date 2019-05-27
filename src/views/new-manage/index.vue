@@ -16,13 +16,17 @@
         @keyup.enter.native="handleFilter"
       />
       <el-select
-        v-model="listQuery.importance"
+        v-model="query.type"
         placeholder="类型"
         clearable
-        style="width: 90px"
+        style="width: 120px"
         class="filter-item"
+        @change="getNewsList"
       >
-        <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
+        <el-option label="资讯" :value="1"/>
+        <el-option label="户外技巧" :value="2"/>
+        <el-option label="户外常识" :value="3"/>
+        <el-option label="户外装备" :value="4"/>
       </el-select>
       <el-date-picker v-model="value1" type="date" class="filter-item" placeholder="选择日期"></el-date-picker>
       <!-- <el-select
@@ -91,9 +95,13 @@
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="id" label="序号" sortable width="50px"></el-table-column>
       <el-table-column prop="title" label="资讯标题"></el-table-column>
-      <el-table-column prop="time" label="发表日期" :formatter="formatter"></el-table-column>
-      <el-table-column prop="name" label="作者" :formatter="formatter"></el-table-column>
-      <el-table-column prop="type" label="类型" :formatter="formatter"></el-table-column>
+      <el-table-column prop="date" label="发表日期" :formatter="formatter"></el-table-column>
+      <el-table-column prop="author" label="作者" :formatter="formatter"></el-table-column>
+      <el-table-column label="类型">
+        <template slot-scope="scope">
+          <span>{{scope.row.type|newsTypeFilter}}</span>
+        </template>
+      </el-table-column>
 
       <el-table-column label="操作">
         <template>
@@ -104,12 +112,14 @@
       </el-table-column>
     </el-table>
 
-    <pagination
-      v-show="total>0"
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page.sync="currentPage3"
+      :page-size="query.pageSize"
+      layout="prev, pager, next, jumper"
       :total="total"
-      :page.sync="listQuery.page"
-      :limit.sync="listQuery.limit"
-    />
+    ></el-pagination>
 
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
@@ -208,6 +218,7 @@ import {
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
+import { getList } from "@/api/news.js";
 
 const calendarTypeOptions = [
   { key: "CN", display_name: "China" },
@@ -243,7 +254,6 @@ export default {
     return {
       tableKey: 0,
       list: null,
-      total: 0,
       listLoading: true,
       listQuery: {
         page: 1,
@@ -253,6 +263,13 @@ export default {
         type: undefined,
         sort: "+id"
       },
+      query: {
+        page: 1,
+        pageSize: 10,
+        type: null,
+        orderBy: null
+      },
+      total: 0,
       tableData: [
         {
           id: "1",
@@ -330,8 +347,28 @@ export default {
       downloadLoading: false
     };
   },
-  created() {},
+  created() {
+    this.getNewsList();
+  },
   methods: {
+    getNewsList() {
+      getList(this.query).then(resp => {
+        this.tableData = resp.data;
+        this.total = resp.total;
+      });
+    },
+    handleSizeChange(pageSize) {
+      this.query.pageSize = pageSize;
+      this.getNewsList();
+    },
+    handleCurrentChange(curPage) {
+      this.query.page = curPage;
+      this.getNewsList();
+    },
+    currentPage3(currentPage) {
+      this.query.page = curPage;
+      this.getNewsList();
+    },
     handleEdit(index, row) {
       console.log(index, row);
     },
@@ -340,6 +377,7 @@ export default {
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
+      console.log(this.multipleSelection);
     },
     handleFilter() {
       this.listQuery.page = 1;
@@ -481,6 +519,22 @@ export default {
           }
         })
       );
+    }
+  },
+  filters: {
+    newsTypeFilter: function(value) {
+      switch (value) {
+        case 1:
+          return "资讯";
+        case 2:
+          return "户外技巧";
+        case 3:
+          return "户外常识";
+        case 4:
+          return "户外装备";
+        default:
+          return "";
+      }
     }
   }
 };
