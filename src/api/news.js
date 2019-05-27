@@ -15,3 +15,11 @@ export function getList(query) {
     params: query
   })
 }
+
+export function deleteNews(data) {
+  return request({
+    url: 'api/Newspaper',
+    method: 'delete',
+    data
+  })
+}

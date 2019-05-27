@@ -27,15 +27,25 @@
             <div class="postInfo-container">
               <el-row>
                 <el-col :span="8">
-                  <el-form-item label-width="60px" label="作者:" class="postInfo-container-item">
+                  <el-form-item
+                    label-width="60px"
+                    label="作者:"
+                    prop="author"
+                    class="postInfo-container-item"
+                  >
                     <el-input v-model="postForm.author" placeholder="请填写作者名称"></el-input>
                   </el-form-item>
                 </el-col>
 
                 <el-col :span="10">
-                  <el-form-item label-width="120px" label="发布时间:" class="postInfo-container-item">
+                  <el-form-item
+                    label-width="120px"
+                    prop="date"
+                    label="发布时间:"
+                    class="postInfo-container-item"
+                  >
                     <el-date-picker
-                      v-model="postForm.display_time"
+                      v-model="postForm.date"
                       type="datetime"
                       format="yyyy-MM-dd HH:mm:ss"
                       placeholder="请选择发布时间"
@@ -44,7 +54,12 @@
                 </el-col>
 
                 <el-col :span="6">
-                  <el-form-item label-width="80px" label="新闻类型:" class="postInfo-container-item">
+                  <el-form-item
+                    label-width="80px"
+                    prop="type"
+                    label="新闻类型:"
+                    class="postInfo-container-item"
+                  >
                     <el-select v-model="postForm.type" placeholder="请选择新闻类型">
                       <el-option label="资讯" :value="1"></el-option>
                       <el-option label="户外技巧" :value="2"></el-option>
@@ -58,9 +73,9 @@
           </el-col>
         </el-row>
 
-        <el-form-item style="margin-bottom: 40px;" label-width="90px" label="新闻来源:">
+        <el-form-item style="margin-bottom: 40px;" prop="source" label-width="90px" label="新闻来源:">
           <el-input
-            v-model="postForm.content_short"
+            v-model="postForm.source"
             :rows="1"
             type="textarea"
             class="article-textarea"
@@ -70,12 +85,13 @@
           <span v-show="contentShortLength" class="word-counter">{{ contentShortLength }}words</span>
         </el-form-item>
 
-        <el-form-item prop="content" style="margin-bottom: 30px;">
-          <Tinymce ref="editor" v-model="postForm.content" :height="400"/>
+        <el-form-item prop="contents" style="margin-bottom: 30px;">
+          <Tinymce ref="editor" v-model="postForm.contents" :height="400"/>
         </el-form-item>
 
-        <el-form-item prop="image_uri" style="margin-bottom: 30px;">
+        <el-form-item prop="imgList" style="margin-bottom: 30px;">
           <el-upload
+            ref="uploadImg"
             action="/api/File/UploadImg"
             list-type="picture-card"
             :on-success="uploadSuccess"
@@ -113,7 +129,7 @@ const defaultForm = {
   author: "",
   title: "", // 文章题目
   content: "", // 文章内容
-  content_short: "", // 文章摘要
+  source: "", // 文章摘要
   source_uri: "", // 文章外链
   imgList: [], // 文章图片
   date: undefined // 发表时间
@@ -168,10 +184,10 @@ export default {
       postForm: {
         author: "", //作者
         title: "", // 文章题目
-        content: "", // 文章内容
-        imgList: "", // 文章图片
-        type: 1,
-        date: undefined, // 发表时间
+        contents: "", // 文章内容
+        imgList: [], // 文章图片
+        type: null,
+        date: null, // 发表时间
         source: ""
       },
       loading: false,
@@ -187,9 +203,6 @@ export default {
     };
   },
   computed: {
-    contentShortLength() {
-      return this.postForm.content_short.length;
-    },
     lang() {
       return this.$store.getters.language;
     }
@@ -200,7 +213,6 @@ export default {
       const id = this.$route.params && this.$route.params.id;
       this.fetchData(id);
     } else {
-      this.postForm = Object.assign({}, defaultForm);
     }
 
     // Why need to make a copy of this.$route here?
@@ -215,7 +227,7 @@ export default {
           this.postForm = response.data;
           // Just for test
           this.postForm.title += `   Article Id:${this.postForm.id}`;
-          this.postForm.content_short += `   Article Id:${this.postForm.id}`;
+          this.postForm.source += `   Article Id:${this.postForm.id}`;
 
           // Set tagsview title
           this.setTagsViewTitle();
@@ -247,6 +259,10 @@ export default {
                 duration: 2000
               });
             }
+            this.$refs.postForm.resetFields();
+            this.postForm.imgList = [];
+            this.$refs.editor.setContent("");
+            this.$refs.uploadImg.clearFiles();
           });
 
           this.postForm.status = "published";
