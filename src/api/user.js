@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/utils/request';
 
 export function login(data) {
   return request({
@@ -35,5 +35,29 @@ export function logout() {
   return request({
     url: '/user/logout',
     method: 'post'
+  })
+}
+
+export function getList(query) {
+  return request({
+    url: '/api/User',
+    method: 'get',
+    params: query
+  })
+}
+
+export function deleteUser(data) {
+  return request({
+    url: '/api/User',
+    method: 'delete',
+    data
+  })
+}
+
+export function updateUser(user) {
+  return request({
+    url: '/api/User',
+    method: 'put',
+    data: user
   })
 }
