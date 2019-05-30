@@ -185,6 +185,7 @@
 import { publicActivity } from "@/api/activity.js";
 import { getToken } from "@/utils/auth";
 import Tinymce from "@/components/Tinymce";
+import store from "@/store";
 export default {
   components: {
     Tinymce
@@ -192,6 +193,7 @@ export default {
   data() {
     return {
       showForm: true,
+      token: "",
       form: {
         id: 0,
         userId: 0,
@@ -250,7 +252,9 @@ export default {
       }
     };
   },
-  created() {},
+  created() {
+    this.token = store.getters.token;
+  },
   methods: {
     toNext() {
       this.$refs["form"].validate(valid => {
