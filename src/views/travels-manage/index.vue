@@ -63,11 +63,10 @@
       <el-table-column prop="name" label="作者" :formatter="formatter"></el-table-column>
       <el-table-column prop="length" label="线路长短" :formatter="formatter"></el-table-column>
 
-      <el-table-column label="操作">
-        <template slot-scope="scope">
-          <el-button size="mini" @click="dialogpass = true">通过</el-button>
-          <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
-        </template>
+      <el-table-column label="操作" width="230px">
+        <el-button size="mini" @click="dialogpass = true">预览</el-button>
+        <el-button size="mini" @click="dialogpass = true">通过</el-button>
+        <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
       </el-table-column>
     </el-table>
 
