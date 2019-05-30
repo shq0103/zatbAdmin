@@ -51,10 +51,10 @@
             </el-form-item>
             <el-form-item label="活动程度" prop="theme">
               <el-select placeholder="请选择活动程度" style="width: 100%!important;" v-model="form.theme">
-                <el-option label="短线" value="shanghai"></el-option>
-                <el-option label="中线" value="beijing"></el-option>
-                <el-option label="长线" value="beijing"></el-option>
-                <el-option label="其他" value="beijing"></el-option>
+                <el-option label="短线" :value="1"></el-option>
+                <el-option label="中线" :value="2"></el-option>
+                <el-option label="长线" :value="3"></el-option>
+                <el-option label="其他" :value="4"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="活动要求">
@@ -84,15 +84,16 @@
             </el-form-item>
             <el-form-item label="活动封面" prop="image">
               <el-upload
+                list-type="picture-card"
                 ref="uploadImg"
                 class="upload-demo"
-                action="https://jsonplaceholder.typicode.com/posts/"
+                action="/api/File/UploadImg"
+                :headers="{Authorization:`Bearer ${token}`}"
                 :on-remove="handleRemove"
-                :before-remove="beforeRemove"
+                :on-success="handleSuccess"
                 :limit="1"
               >
-                <el-button size="small" type="success" plain>点击上传</el-button>
-                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                <i class="el-icon-plus"></i>
               </el-upload>
             </el-form-item>
             <el-form-item>
@@ -194,24 +195,24 @@ export default {
       form: {
         id: 0,
         userId: 0,
-        name: "string",
-        startDate: 0,
-        endDate: 0,
-        deadline: 0,
+        name: "",
+        startDate: "",
+        endDate: "",
+        deadline: "",
         status: 0,
-        startPlace: "string",
-        theme: 0,
+        startPlace: "",
+        theme: "",
         quota: 0,
         price: 0,
-        destination: "string",
+        destination: "",
         viewCount: 0,
-        image: "string",
-        explain: "string",
-        routing: "string",
-        costExplain: "string",
-        line: "string",
-        equip: "string",
-        moreInfo: "string"
+        image: "",
+        explain: "",
+        routing: "",
+        costExplain: "",
+        line: "",
+        equip: "",
+        moreInfo: ""
       },
       token: "",
       rules: {
@@ -261,8 +262,12 @@ export default {
         }
       });
     },
-    handleRemove() {},
-    beforeRemove() {},
+    handleSuccess(response) {
+      this.form.image = response.data;
+    },
+    handleRemove() {
+      this.form.image = "";
+    },
     submitForm() {
       // this.postForm.display_time = parseInt(this.display_time / 1000);
       console.log(this.form);
