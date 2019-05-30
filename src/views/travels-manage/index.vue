@@ -25,9 +25,6 @@
         <el-option v-for="item in importanceOptions" :key="item" :label="item" :value="item"/>
       </el-select>
       <el-date-picker v-model="value1" type="date" class="filter-item" placeholder="选择日期"></el-date-picker>
-      <!-- <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        {{ $t('table.reviewer') }}
-      </el-checkbox>-->
       <el-button
         v-waves
         class="filter-item"
@@ -42,9 +39,6 @@
         icon="el-icon-check"
         @click="handleFilter"
       >批量通过</el-button>
-      <!-- <el-checkbox v-model="showReviewer" class="filter-item" style="margin-left:15px;" @change="tableKey=tableKey+1">
-        {{ $t('table.reviewer') }}
-      </el-checkbox>-->
     </div>
 
     <el-table
@@ -64,9 +58,11 @@
       <el-table-column prop="length" label="线路长短" :formatter="formatter"></el-table-column>
 
       <el-table-column label="操作" width="230px">
-        <el-button size="mini" @click="dialogpass = true">预览</el-button>
-        <el-button size="mini" @click="dialogpass = true">通过</el-button>
-        <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
+        <template slot-scope="scope">
+          <el-button size="mini" @click="showReviewer(scope.row.id)">预览</el-button>
+          <el-button size="mini" @click="dialogpass = true">通过</el-button>
+          <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
 
@@ -258,7 +254,6 @@ export default {
         { label: "ID Descending", key: "-id" }
       ],
       statusOptions: ["published", "draft", "deleted"],
-      showReviewer: false,
       temp: {
         id: undefined,
         importance: 1,
@@ -312,6 +307,9 @@ export default {
           this.listLoading = false;
         }, 1.5 * 1000);
       });
+    },
+    showReviewer(id) {
+      this.$router.push(`/travels-manage/travels/${id}`);
     },
     handleEdit(index, row) {
       console.log(index, row);

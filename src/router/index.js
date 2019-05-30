@@ -182,6 +182,13 @@ export const constantRoutes = [
         component: () => import('@/views/travels-manage/index'),
         name: '路书管理',
         meta: { title: '路书管理', icon: 'mtravels' }
+      },
+      {
+        hidden: true,
+        path: 'travels/:id(\\d+)',
+        component: () => import('@/views/travels-manage/travels-show/index'),
+        name: '路书预览',
+        meta: { title: '路书预览', icon: 'mtravels' }
       }
     ]
   },
