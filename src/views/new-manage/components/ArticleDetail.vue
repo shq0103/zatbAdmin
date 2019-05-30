@@ -265,7 +265,6 @@ export default {
             this.$refs.uploadImg.clearFiles();
           });
 
-          this.postForm.status = "published";
           this.loading = false;
         } else {
           console.log("error submit!!");

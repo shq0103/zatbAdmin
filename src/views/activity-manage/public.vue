@@ -1,13 +1,13 @@
 <template>
-  <article-detail :is-edit="false" />
+  <ActivityPublic :is-edit="false"/>
 </template>
 
 <script>
-import ArticleDetail from './components/ArticleDetail'
+import ActivityPublic from "./components/ActivityPublic";
 
 export default {
-  name: 'CreateForm',
-  components: { ArticleDetail }
-}
+  name: "CreateForm",
+  components: { ActivityPublic }
+};
 </script>
 

@@ -23,7 +23,7 @@
         class="filter-item"
         @change="getNewsList"
       >
-        <el-option label="资讯" :value="1"/>
+        <el-option label="新闻" :value="1"/>
         <el-option label="户外技巧" :value="2"/>
         <el-option label="户外常识" :value="3"/>
         <el-option label="户外装备" :value="4"/>
@@ -92,13 +92,12 @@ import moment from "moment";
 
 export default {
   name: "ComplexTable",
-
   directives: { waves },
   filters: {
     newsTypeFilter: function(value) {
       switch (value) {
         case 1:
-          return "资讯";
+          return "新闻";
         case 2:
           return "户外技巧";
         case 3:
