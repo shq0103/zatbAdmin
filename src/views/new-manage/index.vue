@@ -4,16 +4,18 @@
       <el-input
         v-model="query.title"
         placeholder="资讯标题"
+        prefix-icon="el-icon-search"
         style="width: 200px;"
         class="filter-item"
-        @keyup.enter.native="handleFilter"
+        @change="getNewsList"
       />
       <el-input
-        v-model="query.title"
-        placeholder="用户名"
+        v-model="query.author"
+        placeholder="作者名"
         style="width: 200px;"
+        prefix-icon="el-icon-search"
         class="filter-item"
-        @keyup.enter.native="handleFilter"
+        @change="getNewsList"
       />
       <el-select
         v-model="query.type"
@@ -28,7 +30,7 @@
         <el-option label="户外常识" :value="3"/>
         <el-option label="户外装备" :value="4"/>
       </el-select>
-      <el-date-picker type="date" class="filter-item" placeholder="选择日期"></el-date-picker>
+      <!-- <el-date-picker type="date" class="filter-item" placeholder="选择日期"></el-date-picker> -->
       <el-button
         v-waves
         class="filter-item"
@@ -56,7 +58,7 @@
         show-overflow-tooltip
         width="50"
       />
-      <el-table-column prop="title" label="资讯标题"></el-table-column>
+      <el-table-column prop="title" label="资讯标题" width="250px"></el-table-column>
       <el-table-column prop="date" label="发表日期" :formatter="timeFormatter"></el-table-column>
       <el-table-column prop="author" label="作者"></el-table-column>
       <el-table-column label="类型">
@@ -68,8 +70,8 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <router-link to="./new-manage/public"></router-link>
-          <el-button size="mini">修改</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <el-button @click="handleEdit(scope.row.id)">修改</el-button>
+          <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -79,7 +81,7 @@
       @current-change="handleCurrentChange"
       :current-page.sync="query.page"
       :page-size="query.pageSize"
-      layout="prev, pager, next, jumper"
+      layout="total,prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
   </div>
@@ -115,7 +117,9 @@ export default {
         page: 1,
         pageSize: 10,
         type: null,
-        orderBy: null
+        orderBy: null,
+        title: "",
+        author: ""
       },
       total: 0,
       tableData: [
@@ -176,7 +180,6 @@ export default {
         });
         return;
       }
-
       this.$confirm("此操作将永久删除选中项, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
@@ -243,6 +246,9 @@ export default {
     },
     timeFormatter(row, column, cellValue, index) {
       return moment(cellValue - 8 * 3600 * 1000).format("YYYY-MM-DD HH:mm");
+    },
+    handleEdit(id) {
+      this.$router.push(`/new-manage/edit/${id}`);
     }
   }
 };

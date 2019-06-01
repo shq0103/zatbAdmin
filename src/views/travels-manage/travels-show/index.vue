@@ -1,18 +1,5 @@
 <template>
   <div class="activity-show">
-    <ul class="activity_top">
-      <li class="activity">
-        <a href="/">首页</a>
-      </li>
-      <li>></li>
-      <li>
-        <a href="/">路书</a>
-      </li>
-      <li>></li>
-      <li>
-        <a href="/">{{travels.title}}</a>
-      </li>
-    </ul>
     <div class="activity_info">
       <div class="a-i-title">
         <h3 class="activity_title">{{travels.title}}</h3>
@@ -90,7 +77,7 @@
                 </el-row>
               </div>
               <div class="a-c-rf-bottom">
-                <el-divider>摘要</el-divider>
+                <span>摘要</span>
                 <div class="a-c-rf-b-content">
                   <p>{{travels.intro}}</p>
                 </div>
@@ -102,7 +89,7 @@
     </div>
     <div class="activity_content">
       <el-row :gutter="20">
-        <el-col :span="17">
+        <el-col :span="24">
           <div class="a-c-lf-1">
             <div class="a-c-lf-content" v-for="(item,index) in travels.travelPlaces" :key="item.id">
               <el-card class="box-card">
@@ -142,27 +129,6 @@
                   </div>
                 </div>
               </el-card>
-            </div>
-          </div>
-        </el-col>
-        <el-col :span="7">
-          <div class="a-c-rf">
-            <div class="a-c-rf-3">
-              <div class="a-c-rf-2-title">相关路书推荐</div>
-              <div class="a-c-rf-2-content" v-for="(item,index) in newList" :key="item.id">
-                <div class="tr-b-rf-bottom" :class="{borderNone:index+1===newList.length}">
-                  <div class="tr-b-rf-img">
-                    <div class="tr-b-rf-img1">
-                      <img :src="item.image" style="width: 95%;height:100%;">
-                    </div>
-                  </div>
-                  <div class="tr-b-rf-title">
-                    <router-link to="/new-show">
-                      <p class="aname1">{{item.title}}</p>
-                    </router-link>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </el-col>
@@ -313,6 +279,9 @@ export default {
 </script>
 
 <style scoped>
+.activity-show {
+  padding: 20px;
+}
 .hamburger-container {
   line-height: 46px;
   height: 100%;

@@ -23,3 +23,10 @@ export function deleteNews(data) {
     data
   })
 }
+
+export function getNewsDetail(id) {
+  return request({
+    url: `/api/Newspaper/${id}`,
+    method: 'get'
+  })
+}

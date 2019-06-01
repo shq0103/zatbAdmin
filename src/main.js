@@ -1,24 +1,24 @@
-import Vue from 'vue'
+import Vue from 'vue';
 
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 
-import 'normalize.css/normalize.css' // a modern alternative to CSS resets
+import 'normalize.css/normalize.css'; // a modern alternative to CSS resets
 
-import Element from 'element-ui'
-import './styles/element-variables.scss'
+import Element from 'element-ui';
+import './styles/element-variables.scss';
 
-import '@/styles/index.scss' // global css
+import '@/styles/index.scss'; // global css
 
-import App from './App'
-import store from './store'
-import router from './router'
+import App from './App';
+import store from './store';
+import router from './router';
 
-import i18n from './lang' // internationalization
-import './icons' // icon
-import './permission' // permission control
-import './utils/error-log' // error log
+import i18n from './lang'; // internationalization
+import './icons'; // icon
+import './permission'; // permission control
+import './utils/error-log'; // error log
 
-import * as filters from './filters' // global filters
+import * as filters from './filters'; // global filters
 
 /**
  * If you don't want to use mock-server

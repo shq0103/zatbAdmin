@@ -7,13 +7,13 @@
         <div class="ac-public-form2">
           <el-form ref="form" label-width="80px" :model="form" :rules="rules">
             <el-form-item label="活动名称" prop="name">
-              <el-input v-model="form.name"></el-input>
+              <el-input v-model="form.name" placeholder="请输入活动名称"></el-input>
             </el-form-item>
             <el-form-item label="活动地点" prop="destination">
-              <el-input v-model="form.destination"></el-input>
+              <el-input v-model="form.destination" placeholder="请输入活动地点"></el-input>
             </el-form-item>
             <el-form-item label="集合地点" prop="startPlace">
-              <el-input v-model="form.startPlace"></el-input>
+              <el-input v-model="form.startPlace" placeholder="请输入集合地点"></el-input>
             </el-form-item>
             <el-form-item label="活动时间" prop="startPlace">
               <el-col :span="11">
@@ -204,8 +204,8 @@ export default {
         status: 0,
         startPlace: "",
         theme: "",
-        quota: 0,
-        price: 0,
+        quota: null,
+        price: null,
         destination: "",
         viewCount: 0,
         image: "",
@@ -220,7 +220,7 @@ export default {
       rules: {
         name: [
           { required: true, message: "请输入活动名称", trigger: "blur" },
-          { max: 20, message: "长度不超过20字符", trigger: "blur" }
+          { max: 50, message: "长度不超过50字符", trigger: "blur" }
         ],
         destination: [
           { required: true, message: "请输入活动目的地", trigger: "blur" }

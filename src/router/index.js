@@ -130,7 +130,7 @@ export const constantRoutes = [
         meta: { title: '活动发布', icon: 'edit' }
       },
       {
-        path: 'edit',
+        path: 'edit/:id(\\d+)',
         component: () => import('@/views/activity-manage/edit'),
         name: '活动报名审核',
         meta: {
@@ -158,6 +158,17 @@ export const constantRoutes = [
         component: () => import('@/views/new-manage/public'),
         name: '资讯发布',
         meta: { title: '资讯发布', icon: 'edit' }
+      },
+      {
+        path: 'edit/:id(\\d+)',
+        component: () => import('@/views/new-manage/edit'),
+        name: 'EditNews',
+        meta: {
+          title: '编辑新闻',
+          noCache: true,
+          activeMenu: '/new-manage/index'
+        },
+        hidden: true
       }
     ]
   },

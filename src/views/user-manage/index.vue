@@ -2,46 +2,49 @@
   <div class="app-container">
     <div class="filter-container">
       <el-input
-        v-model="listQuery.title"
+        v-model="query.keyword"
         placeholder="用户名"
         style="width: 200px;"
         class="filter-item"
-        @keyup.enter.native="handleFilter"
+        prefix-icon="el-icon-search"
+        @change="handleFilter"
       />
       <el-select
-        v-model="listQuery.importance"
+        v-model="query.gender"
         placeholder="性别"
         clearable
         style="width: 90px"
         class="filter-item"
+        @change="handleFilter"
       >
         <el-option label="男" :value="1"/>
-        <el-option label="女" :value="2"/>
+        <el-option label="女" :value="0"/>
       </el-select>
       <el-select
-        v-model="listQuery.type"
+        v-model="query.status"
+        @change="handleFilter"
         placeholder="禁言状态"
         clearable
         class="filter-item"
         style="width: 130px"
       >
         <el-option label="禁言中" :value="1"/>
-        <el-option label="未禁言" :value="2"/>
+        <el-option label="未禁言" :value="0"/>
       </el-select>
       <el-button
         v-waves
         class="filter-item"
         type="primary"
         icon="el-icon-delete"
-        @click="handleFilter"
+        @click="handleDeleteAll"
       >批量删除</el-button>
-      <el-button
+      <!-- <el-button
         class="filter-item"
         style="margin-left: 10px;"
         type="primary"
         icon="el-icon-close"
         @click="handleFilter"
-      >批量禁言</el-button>
+      >批量禁言</el-button>-->
     </div>
 
     <el-table
@@ -54,22 +57,25 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column prop="id" label="序号" sortable width="50px"></el-table-column>
+      <el-table-column type="index" :index="index" label="序号" sortable width="50px"></el-table-column>
       <el-table-column prop="time" label="上次登陆时间"></el-table-column>
-      <el-table-column prop="username" label="用户名" :formatter="formatter"></el-table-column>
-      <el-table-column prop="truename" label="真实姓名" :formatter="formatter"></el-table-column>
-      <el-table-column prop="sex" label="性别" :formatter="formatter"></el-table-column>
-      <el-table-column prop="password" label="密码" :formatter="formatter"></el-table-column>
-      <el-table-column prop="phone" label="手机号" :formatter="formatter"></el-table-column>
-      <el-table-column label="操作" width="300px">
+      <el-table-column prop="username" label="用户名"></el-table-column>
+      <el-table-column prop="trueName" label="真实姓名"></el-table-column>
+      <el-table-column prop="gender" label="性别">
         <template slot-scope="scope">
-          <el-button size="mini" @click="dialogedit = true">编辑</el-button>
+          <span>{{scope.row.gender|genderFilter}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="password" label="密码"></el-table-column>
+      <el-table-column prop="phone" label="手机号"></el-table-column>
+      <el-table-column label="操作" width="290px">
+        <template slot-scope="scope">
+          <el-button @click="dialogedit = true">编辑</el-button>
           <el-button
-            size="mini"
             :type="scope.row.status == 0 ?'danger':'success'"
             @click="banUser(scope.row)"
           >{{scope.row.status == 0 ? "禁言" : "解除禁言"}}</el-button>
-          <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
+          <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -79,39 +85,16 @@
       @current-change="handleCurrentChange"
       :current-page.sync="query.page"
       :page-size="query.pageSize"
-      layout="prev, pager, next, jumper"
+      layout="total,prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
 
-    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
-      <el-table :data="pvData" border fit highlight-current-row style="width: 100%">
-        <el-table-column prop="key" label="Channel"/>
-        <el-table-column prop="pv" label="Pv"/>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogPvVisible = false">{{ $t('table.confirm') }}</el-button>
-      </span>
-    </el-dialog>
     <el-dialog title="修改密码" :visible.sync="dialogedit" width="30%" :before-close="handleClose">
       <span>请填入新密码</span>
       <el-input placeholder="请输入密码" v-model="input" show-password style="margin-top:10px;"></el-input>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogedit = false">取 消</el-button>
         <el-button type="primary" @click="dialogedit = false">确 定</el-button>
-      </span>
-    </el-dialog>
-    <el-dialog :visible.sync="dialogban" width="30%" :before-close="handleClose">
-      <span>是否禁言</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogban = false">取 消</el-button>
-        <el-button type="primary" @click="dialogban = false">确 定</el-button>
-      </span>
-    </el-dialog>
-    <el-dialog :visible.sync="dialogdelete" width="30%" :before-close="handleClose">
-      <span>是否删除</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogdelete = false">取 消</el-button>
-        <el-button type="primary" @click="dialogdelete = false">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -134,16 +117,16 @@ export default {
   components: { Pagination },
   directives: { waves },
   filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: "success",
-        draft: "info",
-        deleted: "danger"
-      };
-      return statusMap[status];
-    },
-    typeFilter(type) {
-      return calendarTypeKeyValue[type];
+    genderFilter: function(value) {
+      switch (value) {
+        case 0:
+          return "女";
+        case 1:
+          return "男";
+
+        default:
+          return "";
+      }
     }
   },
   data() {
@@ -151,47 +134,14 @@ export default {
       query: {
         page: 1,
         pageSize: 10,
-        keyword: ""
+        keyword: "",
+        gender: null,
+        status: null
       },
       list: null,
       total: 0,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: "+id"
-      },
       tableData: [
-        {
-          id: "1",
-          time: "2016-05-02",
-          name: "王小虎",
-          truename: "啦啦啦",
-          sex: "女",
-          number: "13338383388",
-          password: "admin"
-        },
-        {
-          id: "1",
-          time: "2016-05-02",
-          name: "王小虎",
-          truename: "啦啦啦",
-          sex: "女",
-          number: "13338383388",
-          password: "admin"
-        },
-        {
-          id: "1",
-          time: "2016-05-02",
-          name: "王小虎",
-          truename: "啦啦啦",
-          sex: "女",
-          number: "13338383388",
-          password: "admin"
-        },
         {
           id: "1",
           time: "2016-05-02",
@@ -230,21 +180,23 @@ export default {
     };
   },
   created() {
-    this.getList();
     this.getUserList();
   },
   methods: {
-    getList() {
-      this.listLoading = true;
-    },
     getUserList() {
+      this.listLoading = true;
       getList(this.query).then(resp => {
         this.tableData = resp.data;
         this.total = resp.total;
+        this.listLoading = false;
       });
     },
     handleCurrentChange(curPage) {
       this.query.page = curPage;
+      this.getUserList();
+    },
+    handleSizeChange(pageSize) {
+      this.query.pageSize = pageSize;
       this.getUserList();
     },
     handleClose(done) {
@@ -257,22 +209,76 @@ export default {
     handleEdit(index, row) {
       console.log(index, row);
     },
-    handleFilter() {
-      this.listQuery.page = 1;
-      this.getList();
+    index(val) {
+      return (this.query.page - 1) * this.query.pageSize + val + 1;
+    },
+    handleDeleteAll() {
+      if (this.multipleSelection.length <= 0) {
+        this.$message({
+          type: "warning",
+          message: "未选中任何项"
+        });
+        return;
+      }
+      this.$confirm("此操作将永久删除选中项, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          let idArr = [];
+          this.multipleSelection.forEach(item => {
+            idArr.push(item.id);
+          });
+          deleteUser(idArr).then(resp => {
+            this.$notify({
+              title: "成功",
+              message: "批量删除成功",
+              type: "success",
+              duration: 2000
+            });
+            this.getUserList();
+          });
+        })
+        .catch(() => {
+          this.$notify({
+            message: "已取消删除",
+            type: "info",
+            duration: 2000
+          });
+        });
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
-    handleDelete(row) {
-      this.$notify({
-        title: "成功",
-        message: "删除成功",
-        type: "success",
-        duration: 2000
-      });
-      const index = this.list.indexOf(row);
-      this.list.splice(index, 1);
+    handleDelete(id) {
+      this.$confirm("此操作将永久删除改项, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          deleteUser([id]).then(resp => {
+            this.$notify({
+              title: "成功",
+              message: "删除成功",
+              type: "success",
+              duration: 2000
+            });
+            this.getUserList();
+          });
+        })
+        .catch(() => {
+          this.$notify({
+            message: "已取消删除",
+            type: "info",
+            duration: 2000
+          });
+        });
+    },
+    handleFilter() {
+      this.query.page = 1;
+      this.getUserList();
     },
     banUser(user) {
       this.user = user;

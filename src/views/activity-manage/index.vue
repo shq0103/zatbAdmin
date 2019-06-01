@@ -1,20 +1,29 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input v-model="query.name" placeholder="活动名称" style="width: 200px;" class="filter-item"/>
       <el-input
-        v-model="query.username"
+        v-model="query.keyword"
+        placeholder="活动名称"
+        style="width: 200px;"
+        class="filter-item"
+        prefix-icon="el-icon-search"
+        @change="handleFilter"
+      />
+      <el-input
+        v-model="query.user"
         placeholder="发起人"
         style="width: 200px;"
         class="filter-item"
+        prefix-icon="el-icon-search"
+        @change="handleFilter"
       />
       <el-select
-        v-model="query.type"
+        v-model="query.status"
         placeholder="审核状态"
         clearable
         class="filter-item"
         style="width: 130px"
-        @change="getAcList"
+        @change="handleFilter"
       >
         <el-option label="未审核" :value="0"/>
         <el-option label="已通过" :value="1"/>
@@ -36,7 +45,12 @@
         @click="handleDeleteAll"
       >批量删除</el-button>
     </div>
-    <el-table v-loading="listLoading" :data="tableData" style="width: 100%">
+    <el-table
+      v-loading="listLoading"
+      :data="tableData"
+      style="width: 100%"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="expand">
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
@@ -44,7 +58,7 @@
               <span>{{ props.row.name }}</span>
             </el-form-item>
             <el-form-item label="线路长短">
-              <span>{{ props.row.theme }}</span>
+              <span>{{ props.row.theme|themeFilter }}</span>
             </el-form-item>
             <el-form-item label="出发地">
               <span>{{ props.row.startPlace }}</span>
@@ -53,18 +67,18 @@
               <span>{{ props.row.destination }}</span>
             </el-form-item>
             <el-form-item label="费用">
-              <span>{{ props.row.price }}</span>
+              <span>{{ props.row.price }}/人</span>
             </el-form-item>
             <el-form-item label="名额">
-              <span>{{ props.row.quota }}</span>
+              <span>{{ props.row.quota }}人</span>
             </el-form-item>
           </el-form>
         </template>
       </el-table-column>
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="序号" type="index" :index="index" sortable width="60px"></el-table-column>
-      <el-table-column label="活动名称" prop="name"></el-table-column>
-      <el-table-column label="活动时间" width="250px">
+      <el-table-column label="活动名称" prop="name" width="250px"></el-table-column>
+      <el-table-column label="活动时间" width="200px">
         <template slot-scope="scope">
           <span>{{scope.row.startDate|timeFormatter}}</span>-
           <span>{{scope.row.endDate|timeFormatter}}</span>
@@ -73,16 +87,25 @@
       <el-table-column label="发起人" prop="username"></el-table-column>
       <el-table-column label="审核状态">
         <template slot-scope="scope">
-          <span>{{scope.row.status|ActivityTypeFilter}}</span>
+          <el-tag v-if="scope.row.status == 0" size="mini">待审核</el-tag>
+          <el-tag v-if="scope.row.status == 1" type="success" size="mini">已通过</el-tag>
+          <el-tag v-if="scope.row.status == 2" type="warning" size="mini">未通过</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="220px">
-        <template>
-          <el-button size="mini" @click="dialogpass = true">通过</el-button>
-          <router-link :to="'/activity-manage/edit/'">
-            <el-button type="success" plain size="mini">报名审核</el-button>
+      <el-table-column label="操作" width="280px">
+        <template slot-scope="scope">
+          <el-button type="info" v-if="scope.row.role == 'admin'" plain>编辑</el-button>
+          <el-popover v-if="scope.row.status == 0" placement="top" trigger="click">
+            <el-row>
+              <el-button size="mini" type="success" @click="passActivity(scope.row.id,1)">通过</el-button>
+              <el-button size="mini" type="warning" @click="passActivity(scope.row.id,2)">不通过</el-button>
+            </el-row>
+            <el-button slot="reference">审核</el-button>
+          </el-popover>
+          <router-link :to="`/activity-manage/edit/${scope.row.id}`">
+            <el-button type="success" plain>报名审核</el-button>
           </router-link>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+          <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -91,7 +114,7 @@
       @current-change="handleCurrentChange"
       :current-page.sync="query.page"
       :page-size="query.pageSize"
-      layout="prev, pager, next, jumper"
+      layout="total,prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
 
@@ -102,14 +125,6 @@
         <el-button type="primary" @click="dialogpass = false">确 定</el-button>
       </span>
     </el-dialog>
-
-    <!-- <el-dialog :visible.sync="dialogdelete" width="30%">
-      <span>是否删除</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogdelete = false">取 消</el-button>
-        <el-button type="primary" @click="dialogdelete = false">确 定</el-button>
-      </span>
-    </el-dialog>-->
   </div>
 </template>
 
@@ -123,21 +138,31 @@ import {
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
-import { getActivityList, deleteActivity } from "@/api/activity.js";
 import moment from "moment";
-
+import {
+  getActivityList,
+  deleteActivity,
+  validActivity,
+  updateActivity
+} from "@/api/activity.js";
 export default {
   name: "ComplexTable",
   components: { Pagination },
   directives: { waves },
   filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: "success",
-        draft: "info",
-        deleted: "danger"
-      };
-      return statusMap[status];
+    themeFilter: function(value) {
+      switch (value) {
+        case 1:
+          return "短线";
+        case 2:
+          return "中线";
+        case 3:
+          return "中线";
+        case 2:
+          return "其他";
+        default:
+          return "";
+      }
     },
     typeFilter(type) {
       return calendarTypeKeyValue[type];
@@ -149,9 +174,9 @@ export default {
       switch (value) {
         case 0:
           return "未审核";
-        case 2:
+        case 1:
           return "已通过";
-        case 3:
+        case 2:
           return "未通过";
         default:
           return "";
@@ -174,14 +199,7 @@ export default {
       total: 0,
       list: null,
       listLoading: true,
-      listQuery: {
-        page: 1,
-        limit: 20,
-        importance: undefined,
-        title: undefined,
-        type: undefined,
-        sort: "+id"
-      },
+
       tableData: [
         {
           id: "1",
@@ -208,6 +226,7 @@ export default {
           quota: "100人"
         }
       ],
+      multipleSelection: [],
       dialogdelete: false,
       dialogpass: false
     };
@@ -260,6 +279,9 @@ export default {
           });
         });
     },
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
     handleDelete(id) {
       this.$confirm("此操作将永久删除改项, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -298,6 +320,22 @@ export default {
     },
     handleFilter() {
       this.query.page = 1;
+      this.getAcList();
+    },
+    passActivity(id, status) {
+      this.$confirm(`${status == 1 ? "通过" : "取消通过"}该活动？`)
+        .then(_ => {
+          validActivity(id, status).then(resp => {
+            this.$notify({
+              title: "成功",
+              message: "操作成功",
+              type: "success",
+              duration: 2000
+            });
+            this.getAcList();
+          });
+        })
+        .catch(_ => {});
     }
   }
 };
