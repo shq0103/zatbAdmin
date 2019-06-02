@@ -35,6 +35,13 @@ export function validActivity(id, status) {
     params: { id, status }
   })
 }
+export function validUser(id, status) {
+  return request({
+    url: '/api/ActivityJion',
+    method: 'put',
+    params: { id, status }
+  })
+}
 export function updateActivity(user) {
   return request({
     url: '/api/Activity',

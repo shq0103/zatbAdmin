@@ -158,7 +158,7 @@ export default {
           return "中线";
         case 3:
           return "中线";
-        case 2:
+        case 4:
           return "其他";
         default:
           return "";

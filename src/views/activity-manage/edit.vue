@@ -41,11 +41,24 @@
       <el-table-column prop="name" label="真实姓名"></el-table-column>
       <el-table-column prop="sex" label="性别"></el-table-column>
       <el-table-column prop="number" label="手机号"></el-table-column>
+      <el-table-column align="middle" label="审核状态" width="100px">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.status == 0" size="mini">待审核</el-tag>
+          <el-tag v-if="scope.row.status == 1" type="success" size="mini">已通过</el-tag>
+          <el-tag v-if="scope.row.status == 2" type="warning" size="mini">未通过</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="300px">
-        <template>
-          <el-button size="mini" @click="dialogedit = true">通过</el-button>
+        <template slot-scope="scope">
+          <el-popover v-if="scope.row.status == 0" placement="top" trigger="click">
+            <el-row>
+              <el-button size="mini" type="success" @click="passUser(scope.row.id,1)">通过</el-button>
+              <el-button size="mini" type="warning" @click="passUser(scope.row.id,2)">不通过</el-button>
+            </el-row>
+            <el-button slot="reference">审核</el-button>
+          </el-popover>
 
-          <el-button size="mini" type="danger" @click="dialogdelete = true">删除</el-button>
+          <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -65,7 +78,7 @@
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
 
-import { getJoinList } from "@/api/activity.js";
+import { getJoinList, validUser } from "@/api/activity.js";
 
 export default {
   directives: { waves },
@@ -166,6 +179,46 @@ export default {
     },
     index(val) {
       return (this.query.page - 1) * this.query.pageSize + val + 1;
+    },
+    handleDelete(id) {
+      this.$confirm("此操作将永久删除改项, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(() => {
+          deleteUser([id]).then(resp => {
+            this.$notify({
+              title: "成功",
+              message: "删除成功",
+              type: "success",
+              duration: 2000
+            });
+            this.getList();
+          });
+        })
+        .catch(() => {
+          this.$notify({
+            message: "已取消删除",
+            type: "info",
+            duration: 2000
+          });
+        });
+    },
+    passUser(id, status) {
+      this.$confirm(`${status == 1 ? "通过" : "取消通过"}该用户？`)
+        .then(_ => {
+          validUser(id, status).then(resp => {
+            this.$notify({
+              title: "成功",
+              message: "操作成功",
+              type: "success",
+              duration: 2000
+            });
+            this.getList();
+          });
+        })
+        .catch(_ => {});
     }
   }
 };
