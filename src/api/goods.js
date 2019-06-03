@@ -7,10 +7,9 @@ export function getGoodsList(query) {
   })
 }
 
-export function deleteGoods(data) {
+export function deleteGoods(id) {
   return request({
-    url: '/api/Goods/{id}',
-    method: 'delete',
-    data
+    url: `/api/Goods/${id}`,
+    method: 'delete'
   })
 }
