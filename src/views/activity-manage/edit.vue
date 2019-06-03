@@ -33,13 +33,16 @@
       fit
       style="width: 100%"
       :default-sort="{prop: 'date', order: 'descending'}"
-      @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="55"></el-table-column>
+      <!-- <el-table-column type="selection" width="55"></el-table-column> -->
       <el-table-column type="index" :index="index" label="序号" sortable width="50px"></el-table-column>
       <el-table-column prop="username" label="用户名"></el-table-column>
       <el-table-column prop="name" label="真实姓名"></el-table-column>
-      <el-table-column prop="sex" label="性别"></el-table-column>
+      <el-table-column label="性别">
+        <template slot-scope="scope">
+          <span>{{scope.row.sex|genderFilter}}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="number" label="手机号"></el-table-column>
       <el-table-column align="middle" label="审核状态" width="100px">
         <template slot-scope="scope">
@@ -78,18 +81,21 @@
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
 
-import { getJoinList, validUser } from "@/api/activity.js";
+import { getJoinList, validUser, deleteUser } from "@/api/activity.js";
 
 export default {
   directives: { waves },
   filters: {
-    statusFilter(status) {
-      const statusMap = {
-        published: "success",
-        draft: "info",
-        deleted: "danger"
-      };
-      return statusMap[status];
+    genderFilter: function(value) {
+      switch (value) {
+        case 0:
+          return "女";
+        case 1:
+          return "男";
+
+        default:
+          return "";
+      }
     }
   },
   data() {
@@ -154,6 +160,7 @@ export default {
     };
   },
   created() {
+    this.id = this.$route.params.id;
     this.query.activityId = this.$route.params && this.$route.params.id;
     this.getList();
   },
@@ -187,7 +194,7 @@ export default {
         type: "warning"
       })
         .then(() => {
-          deleteUser([id]).then(resp => {
+          deleteUser(id).then(resp => {
             this.$notify({
               title: "成功",
               message: "删除成功",

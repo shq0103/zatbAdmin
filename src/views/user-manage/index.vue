@@ -58,7 +58,7 @@
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column type="index" :index="index" label="序号" sortable width="50px"></el-table-column>
-      <el-table-column prop="time" label="上次登陆时间"></el-table-column>
+      <el-table-column prop="lastTime" label="上次登陆时间" :formatter="timeFormatter" width="150px"></el-table-column>
       <el-table-column prop="username" label="用户名"></el-table-column>
       <el-table-column prop="trueName" label="真实姓名"></el-table-column>
       <el-table-column prop="gender" label="性别">
@@ -66,11 +66,11 @@
           <span>{{scope.row.gender|genderFilter}}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="password" label="密码"></el-table-column>
+      <!-- <el-table-column prop="password" label="密码"></el-table-column> -->
       <el-table-column prop="phone" label="手机号"></el-table-column>
-      <el-table-column label="操作" width="290px">
+      <el-table-column label="操作" width="320px">
         <template slot-scope="scope">
-          <el-button @click="dialogedit = true">编辑</el-button>
+          <el-button @click="changePassword(scope.row)">更改密码</el-button>
           <el-button
             :type="scope.row.status == 0 ?'danger':'success'"
             @click="banUser(scope.row)"
@@ -90,11 +90,20 @@
     ></el-pagination>
 
     <el-dialog title="修改密码" :visible.sync="dialogedit" width="30%" :before-close="handleClose">
-      <span>请填入新密码</span>
-      <el-input placeholder="请输入密码" v-model="input" show-password style="margin-top:10px;"></el-input>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item style="margin:0px!important!;">
+          <span>请填入新密码</span>
+          <el-input
+            placeholder="请输入密码"
+            v-model="form.password"
+            show-password
+            style="margin-top:10px;"
+          ></el-input>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogedit = false">取 消</el-button>
-        <el-button type="primary" @click="dialogedit = false">确 定</el-button>
+        <el-button type="primary" @click="submitForm('form')">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -109,9 +118,9 @@ import {
 } from "@/api/article";
 import waves from "@/directive/waves"; // waves directive
 import { parseTime } from "@/utils";
-import { getList, deleteUser, updateUser } from "@/api/user.js";
+import { getList, deleteUser, updateUser, getUserDetail } from "@/api/user.js";
 import Pagination from "@/components/Pagination"; // secondary package based on el-pagination
-
+import moment from "moment";
 export default {
   name: "ComplexTable",
   components: { Pagination },
@@ -131,6 +140,25 @@ export default {
   },
   data() {
     return {
+      form: {
+        id: 0,
+        username: "",
+        password: "",
+        nickname: "",
+        role: "",
+        avatar: "",
+        birthday: null,
+        gender: null,
+        trueName: "",
+        idCard: "",
+        phone: "",
+        mail: "",
+        intro: "",
+        place: "",
+        lastTime: 0,
+        status: 0
+      },
+      token: "",
       query: {
         page: 1,
         pageSize: 10,
@@ -181,6 +209,10 @@ export default {
   },
   created() {
     this.getUserList();
+    this.token = localStorage.getItem("token");
+    getUserDetail(1111).then(resp => {
+      Object.assign(this.form, resp.data);
+    });
   },
   methods: {
     getUserList() {
@@ -198,6 +230,9 @@ export default {
     handleSizeChange(pageSize) {
       this.query.pageSize = pageSize;
       this.getUserList();
+    },
+    timeFormatter(row, column, cellValue, index) {
+      return moment(cellValue - 8 * 3600 * 1000).format("YYYY-MM-DD HH:mm");
     },
     handleClose(done) {
       this.$confirm("确认关闭？")
@@ -295,7 +330,39 @@ export default {
           });
         })
         .catch(_ => {});
+    },
+    submitForm(formName) {
+      this.$refs[formName].validate(valid => {
+        if (valid) {
+          this.form.birthday = Date.parse(new Date(this.form.birthday));
+          updateUser(this.form).then(resp => {
+            this.$notify({
+              title: "成功",
+              message: "提交成功",
+              type: "success",
+              duration: 2000
+            });
+          });
+        } else {
+          this.$notify({
+            title: "失败",
+            message: "提交失败",
+            type: "warning",
+            duration: 2000
+          });
+        }
+      });
+    },
+    changePassword(user) {
+      Object.assign(this.form, user);
+      this.form.password = "";
+      this.dialogedit = true;
     }
   }
 };
 </script>
+<style>
+.el-form-item__content {
+  margin: 0px !important;
+}
+</style>

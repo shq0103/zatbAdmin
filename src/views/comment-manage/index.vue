@@ -36,7 +36,7 @@
         <template slot-scope="props">
           <el-form label-position="left" inline class="demo-table-expand">
             <el-form-item label="评论内容">
-              <span>{{ props.row.content }}</span>
+              <span>{{ props.row.contents }}</span>
             </el-form-item>
           </el-form>
         </template>
@@ -49,7 +49,7 @@
         </template>
       </el-table-column>
       <el-table-column label="评论时间" prop="time" :formatter="timeFormatter"></el-table-column>
-      <el-table-column label="用户名" prop="name"></el-table-column>
+      <el-table-column label="用户名" prop="username"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <!-- <el-button size="mini" @click="dialogpass = true">通过</el-button> -->

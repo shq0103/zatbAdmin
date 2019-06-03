@@ -58,7 +58,7 @@
       <el-table-column type="index" :index="index" label="序号" sortable width="50px"></el-table-column>
       <el-table-column prop="name" label="闲趣名称"></el-table-column>
       <el-table-column prop="time" label="发布时间" :formatter="timeFormatter"></el-table-column>
-      <el-table-column prop="userId" label="发布人"></el-table-column>
+      <el-table-column prop="username" label="发布人"></el-table-column>
       <el-table-column label="类别">
         <template slot-scope="scope">
           <span>{{scope.row.type|goodsTypeFilter}}</span>
@@ -67,8 +67,9 @@
       <el-table-column prop="sPrice" label="卖价/元"></el-table-column>
 
       <el-table-column label="操作" width="150px">
-        <!-- <el-button @click="dialogpass = true">审核</el-button> -->
-        <el-button type="danger" @click="dialogdelete = true">删除</el-button>
+        <template slot-scope="scope">
+          <el-button type="danger" @click="handleDelete(scope.row.id)">删除</el-button>
+        </template>
       </el-table-column>
     </el-table>
     <el-pagination

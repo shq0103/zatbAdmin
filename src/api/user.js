@@ -61,3 +61,9 @@ export function updateUser(user) {
     data: user
   })
 }
+export function getUserDetail(id) {
+  return request({
+    url: `/api/User/${id}`,
+    method: 'get'
+  })
+}

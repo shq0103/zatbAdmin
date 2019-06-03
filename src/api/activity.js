@@ -7,6 +7,7 @@ export function publicActivity(data) {
     data
   })
 }
+
 export function getActivityList(query) {
   return request({
     url: '/api/Activity',
@@ -26,6 +27,12 @@ export function deleteActivity(data) {
     url: '/api/Activity',
     method: 'delete',
     data
+  })
+}
+export function deleteUser(id) {
+  return request({
+    url: `/api/ActivityJion/${id}`,
+    method: 'delete'
   })
 }
 export function validActivity(id, status) {

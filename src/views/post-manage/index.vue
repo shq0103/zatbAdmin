@@ -53,7 +53,7 @@
       <el-table-column type="index" :index="index" label="序号" sortable width="50px"></el-table-column>
       <el-table-column prop="title" label="帖子标题"></el-table-column>
       <el-table-column prop="date" label="发表日期" :formatter="timeFormatter"></el-table-column>
-      <el-table-column prop="userId" label="发布人"></el-table-column>
+      <el-table-column prop="username" label="发布人"></el-table-column>
       <el-table-column prop="type" label="类型">
         <template slot-scope="scope">
           <span>{{scope.row.type|postTypeFilter}}</span>
