@@ -139,6 +139,17 @@ export const constantRoutes = [
           activeMenu: '/activity-manage/index'
         },
         hidden: true
+      },
+      {
+        path: 'xiugai/:id(\\d+)',
+        component: () => import('@/views/activity-manage/xiugai'),
+        name: 'EditActivity',
+        meta: {
+          title: '编辑活动',
+          noCache: true,
+          activeMenu: '/activity-manage/index'
+        },
+        hidden: true
       }
     ]
   },

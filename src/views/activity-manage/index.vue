@@ -94,7 +94,12 @@
       </el-table-column>
       <el-table-column label="操作" width="280px">
         <template slot-scope="scope">
-          <el-button type="info" v-if="scope.row.role == 'admin'" plain>编辑</el-button>
+          <el-button
+            type="info"
+            v-if="scope.row.role == 'admin'"
+            plain
+            @click="editAc(scope.row.id)"
+          >编辑</el-button>
           <el-popover v-if="scope.row.status == 0" placement="top" trigger="click">
             <el-row>
               <el-button size="mini" type="success" @click="passActivity(scope.row.id,1)">通过</el-button>
@@ -241,6 +246,9 @@ export default {
         this.tableData = resp.data;
         this.total = resp.total;
       });
+    },
+    editAc(id) {
+      this.$router.push("/activity-manage/xiugai/" + id);
     },
     handleDeleteAll() {
       if (this.multipleSelection.length <= 0) {

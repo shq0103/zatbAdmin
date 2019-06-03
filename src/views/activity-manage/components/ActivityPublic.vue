@@ -92,6 +92,7 @@
                 :on-remove="handleRemove"
                 :on-success="handleSuccess"
                 :limit="1"
+                :file-list="imageList"
               >
                 <i class="el-icon-plus"></i>
               </el-upload>
@@ -182,13 +183,19 @@
   </div>
 </template>
 <script>
-import { publicActivity } from "@/api/activity.js";
+import { publicActivity, getAcDetail, putActivity } from "@/api/activity.js";
 import { getToken } from "@/utils/auth";
 import Tinymce from "@/components/Tinymce";
 import store from "@/store";
 export default {
   components: {
     Tinymce
+  },
+  props: {
+    isEdit: {
+      type: Boolean,
+      default: false
+    }
   },
   data() {
     return {
@@ -217,6 +224,7 @@ export default {
         moreInfo: ""
       },
       token: "",
+      imageList: [],
       rules: {
         name: [
           { required: true, message: "请输入活动名称", trigger: "blur" },
@@ -254,6 +262,13 @@ export default {
   },
   created() {
     this.token = store.getters.token;
+    if (this.isEdit) {
+      const id = this.$route.params && this.$route.params.id;
+      getAcDetail(id).then(resp => {
+        Object.assign(this.form, resp.data);
+        this.imageList.push({ url: `/image/${resp.data.image}` });
+      });
+    }
   },
   methods: {
     toNext() {
@@ -281,19 +296,41 @@ export default {
       this.$refs.form.validate(valid => {
         if (valid) {
           this.loading = true;
-          publicActivity(this.form).then(resp => {
-            if (resp.code === 0) {
-              this.$notify({
-                title: "成功",
-                message: "发布活动成功",
-                type: "success",
-                duration: 2000
+          if (this.isEdit) {
+            putActivity(this.form)
+              .then(resp => {
+                if (resp.code === 0) {
+                  this.$notify({
+                    title: "成功",
+                    message: "修改活动成功",
+                    type: "success",
+                    duration: 2000
+                  });
+                }
+                this.$refs.from.resetFields();
+                this.$refs.uploadImg.clearFiles();
+              })
+              .catch(() => {
+                this.loading = false;
               });
-            }
-            this.$refs.from.resetFields();
-            this.$refs.uploadImg.clearFiles();
-          });
-          this.loading = false;
+          } else {
+            publicActivity(this.form)
+              .then(resp => {
+                if (resp.code === 0) {
+                  this.$notify({
+                    title: "成功",
+                    message: "发布活动成功",
+                    type: "success",
+                    duration: 2000
+                  });
+                }
+                this.$refs.from.resetFields();
+                this.$refs.uploadImg.clearFiles();
+              })
+              .catch(() => {
+                this.loading = false;
+              });
+          }
         } else {
           console.log("error submit!!");
           return false;

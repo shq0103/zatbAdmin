@@ -56,3 +56,17 @@ export function updateActivity(user) {
     data: user
   })
 }
+export function getAcDetail(id) {
+  return request({
+    url: `/api/Activity/${id}`,
+    method: 'get'
+  })
+}
+
+export function putActivity(data) {
+  return request({
+    url: `/api/Activity`,
+    method: 'put',
+    data
+  })
+}
