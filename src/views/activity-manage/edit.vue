@@ -38,6 +38,7 @@
       <el-table-column type="index" :index="index" label="序号" sortable width="50px"></el-table-column>
       <el-table-column prop="username" label="用户名"></el-table-column>
       <el-table-column prop="name" label="真实姓名"></el-table-column>
+      <el-table-column prop="idcard" label="身份证" width="150px;"></el-table-column>
       <el-table-column label="性别">
         <template slot-scope="scope">
           <span>{{scope.row.sex|genderFilter}}</span>
